@@ -1,7 +1,9 @@
 package company.tothepoint.controller;
 
 import company.tothepoint.model.BusinessUnit;
+import company.tothepoint.model.NewBusinessUnitNotification;
 import company.tothepoint.repository.BusinessUnitRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,16 @@ import java.util.Optional;
 public class BusinessUnitController {
     @Autowired
     private BusinessUnitRepository businessUnitRepository;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private String exchangeName;
+
+    @Autowired
+    private String routingKey;
+
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<BusinessUnit>> getAllBusinessUnits() {
@@ -34,7 +46,9 @@ public class BusinessUnitController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<BusinessUnit> createBusinessUnit(@RequestBody BusinessUnit businessUnit) {
-        return new ResponseEntity<>(businessUnitRepository.save(businessUnit), HttpStatus.CREATED);
+        BusinessUnit createdBusinessUnit = businessUnitRepository.save(businessUnit);
+        rabbitTemplate.convertAndSend(exchangeName, routingKey, new NewBusinessUnitNotification("businessUnitCreated", createdBusinessUnit));
+        return new ResponseEntity<>(createdBusinessUnit, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
