@@ -1,8 +1,9 @@
 package company.tothepoint.controller;
 
-import company.tothepoint.model.BusinessUnit;
-import company.tothepoint.model.NewBusinessUnitNotification;
+import company.tothepoint.model.businessunit.*;
 import company.tothepoint.repository.BusinessUnitRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/business-units")
 public class BusinessUnitController {
+    private static final Logger LOG = LoggerFactory.getLogger(BusinessUnitController.class);
     @Autowired
     private BusinessUnitRepository businessUnitRepository;
 
@@ -30,11 +32,13 @@ public class BusinessUnitController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<BusinessUnit>> getAllBusinessUnits() {
+        LOG.debug("GET /business-units getAllBusinessUnits() called!");
         return new ResponseEntity<>(businessUnitRepository.findAll(), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     public ResponseEntity<BusinessUnit> getBusinessUnit(@PathVariable("id") String id) {
+        LOG.debug("GET /business-units/"+id+" getBusinessUnit("+id+") called!");
         Optional<BusinessUnit> businessUnitOption = Optional.ofNullable(businessUnitRepository.findOne(id));
 
         return businessUnitOption.map(businessUnit->
@@ -46,19 +50,21 @@ public class BusinessUnitController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<BusinessUnit> createBusinessUnit(@RequestBody BusinessUnit businessUnit) {
+        LOG.debug("POST /business-units createBusinessUnit(..) called!");
         BusinessUnit createdBusinessUnit = businessUnitRepository.save(businessUnit);
-        rabbitTemplate.convertAndSend(exchangeName, routingKey, new NewBusinessUnitNotification("businessUnitCreated", createdBusinessUnit));
+        rabbitTemplate.convertAndSend(exchangeName, routingKey, new BusinessUnitCreatedNotification("businessUnitCreated", createdBusinessUnit));
         return new ResponseEntity<>(createdBusinessUnit, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
     public ResponseEntity<BusinessUnit> updateBusinessUnit(@PathVariable("id") String id, @RequestBody BusinessUnit businessUnit) {
+        LOG.debug("PUT /business-units/"+id+" updateBusinessUnit("+id+", ..) called!");
         Optional<BusinessUnit> existingBusinessUnit = Optional.ofNullable(businessUnitRepository.findOne(id));
 
         return existingBusinessUnit.map(bu ->
             {
                 bu.setNaam(businessUnit.getNaam());
-                rabbitTemplate.convertAndSend(exchangeName, routingKey, new NewBusinessUnitNotification("businessUnitUpdated", bu));
+                rabbitTemplate.convertAndSend(exchangeName, routingKey, new BusinessUnitUpdatedNotification("businessUnitUpdated", bu));
                 return new ResponseEntity<>(businessUnitRepository.save(bu), HttpStatus.OK);
             }
         ).orElse(
@@ -68,11 +74,10 @@ public class BusinessUnitController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
     public ResponseEntity<BusinessUnit> deleteBusinessUnit(@PathVariable("id") String id) {
+        LOG.debug("DELETE /business-units/"+id+" deleteBusinessUnit("+id+") called!");
         if (businessUnitRepository.exists(id)) {
             businessUnitRepository.delete(id);
-            BusinessUnit deletedBusinessUnit = new BusinessUnit("");
-            deletedBusinessUnit.setId(id);
-            rabbitTemplate.convertAndSend(exchangeName, routingKey, new NewBusinessUnitNotification("businessUnitDeleted", deletedBusinessUnit));
+            rabbitTemplate.convertAndSend(exchangeName, routingKey, new BusinessUnitDeletedNotification("businessUnitDeleted", id));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

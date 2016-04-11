@@ -4,6 +4,14 @@ spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: WARN
+    company.tothepoint: DEBUG
 ---
 
 spring:

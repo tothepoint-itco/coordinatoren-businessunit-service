@@ -1,4 +1,4 @@
-package company.tothepoint.model;
+package company.tothepoint.model.businessunit;
 
 
 import org.springframework.data.annotation.Id;

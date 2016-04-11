@@ -2,7 +2,7 @@ package company.tothepoint.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import company.tothepoint.BusinessunitApplication;
-import company.tothepoint.model.BusinessUnit;
+import company.tothepoint.model.businessunit.BusinessUnit;
 import company.tothepoint.repository.BusinessUnitRepository;
 import org.junit.After;
 import org.junit.Before;
