@@ -58,6 +58,7 @@ public class BusinessUnitController {
         return existingBusinessUnit.map(bu ->
             {
                 bu.setNaam(businessUnit.getNaam());
+                rabbitTemplate.convertAndSend(exchangeName, routingKey, new NewBusinessUnitNotification("businessUnitUpdated", bu));
                 return new ResponseEntity<>(businessUnitRepository.save(bu), HttpStatus.OK);
             }
         ).orElse(
@@ -69,6 +70,9 @@ public class BusinessUnitController {
     public ResponseEntity<BusinessUnit> deleteBusinessUnit(@PathVariable("id") String id) {
         if (businessUnitRepository.exists(id)) {
             businessUnitRepository.delete(id);
+            BusinessUnit deletedBusinessUnit = new BusinessUnit("");
+            deletedBusinessUnit.setId(id);
+            rabbitTemplate.convertAndSend(exchangeName, routingKey, new NewBusinessUnitNotification("businessUnitDeleted", deletedBusinessUnit));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
