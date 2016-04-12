@@ -1,9 +1,19 @@
 spring:
   application:
-    name: bussinesunit-service
+    name: businessunit-service
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
+eureka:
+    instance:
+        leaseRenewalIntervalInSeconds: 3
+        metadataMap:
+            instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${random.value}}}
+    client:
+        registryFetchIntervalSeconds: 5
+        instanceInfoReplicationIntervalSeconds: 5
+        initialInstanceInfoReplicationIntervalSeconds: 5
 
 server:
   port: 8080
@@ -26,3 +36,10 @@ app:
       host: rabbitmq
 server:
   port: 8080
+
+eureka:
+    instance:
+        preferIpAddress: true
+    client:
+        serviceUrl:
+            defaultZone: http://discovery:8761/eureka/
