@@ -24,3 +24,5 @@ spring:
 app:
   rabbitmq:
       host: rabbitmq
+server:
+  port: 8080
