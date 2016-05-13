@@ -30,7 +30,7 @@ jar {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-group = "company.tothepoint"
+group = "tothepointitco"
 
 docker {
 	maintainer = "Kaj Van der Hallen <kaj.vanderhallen@tothepoint.company>"
