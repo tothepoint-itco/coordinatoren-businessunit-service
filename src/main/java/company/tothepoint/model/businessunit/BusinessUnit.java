@@ -10,8 +10,8 @@ public class BusinessUnit {
     @Id
     private String id;
 
-    @NotNull
-    @Size(min = 1, max = 255)
+    @NotNull(message = "businessunit.error.naam.notnull")
+    @Size(min = 1, max = 255, message = "businessunit.error.naam.size")
     private String naam;
 
     public BusinessUnit() {

@@ -9,6 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -47,5 +48,13 @@ public class BusinessunitApplication {
 	@Bean
 	TopicExchange topicExchange() {
 		return new TopicExchange(BUSINESSUNIT_EXCHANGE, true, false);
+	}
+
+	@Bean(name = "messageSource")
+	public ReloadableResourceBundleMessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageBundle = new ReloadableResourceBundleMessageSource();
+		messageBundle.setBasename("classpath:messages/messages");
+		messageBundle.setDefaultEncoding("UTF-8");
+		return messageBundle;
 	}
 }

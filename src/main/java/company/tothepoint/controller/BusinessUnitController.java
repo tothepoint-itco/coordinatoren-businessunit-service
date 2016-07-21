@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class BusinessUnitController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<BusinessUnit> createBusinessUnit(@RequestBody BusinessUnit businessUnit) {
+    public ResponseEntity<BusinessUnit> createBusinessUnit(@Validated @RequestBody BusinessUnit businessUnit) {
         LOG.debug("POST /business-units createBusinessUnit(..) called!");
         BusinessUnit createdBusinessUnit = businessUnitRepository.save(businessUnit);
         rabbitTemplate.convertAndSend(exchangeName, routingKey, new BusinessUnitCreatedNotification("businessUnitCreated", createdBusinessUnit));
@@ -57,7 +58,7 @@ public class BusinessUnitController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
-    public ResponseEntity<BusinessUnit> updateBusinessUnit(@PathVariable("id") String id, @RequestBody BusinessUnit businessUnit) {
+    public ResponseEntity<BusinessUnit> updateBusinessUnit(@PathVariable("id") String id, @Validated @RequestBody BusinessUnit businessUnit) {
         LOG.debug("PUT /business-units/"+id+" updateBusinessUnit("+id+", ..) called!");
         Optional<BusinessUnit> existingBusinessUnit = Optional.ofNullable(businessUnitRepository.findOne(id));
 
