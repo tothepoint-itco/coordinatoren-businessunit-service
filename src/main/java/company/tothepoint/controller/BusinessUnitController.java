@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/business-units")
@@ -34,7 +35,12 @@ public class BusinessUnitController {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<BusinessUnit>> getAllBusinessUnits() {
         LOG.debug("GET /business-units getAllBusinessUnits() called!");
-        return new ResponseEntity<>(businessUnitRepository.findAll(), HttpStatus.OK);
+
+        List<BusinessUnit> businessUnits = businessUnitRepository.findAll().stream()
+                .sorted((o1, o2) -> o1.getNaam().compareTo(o2.getNaam()))
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(businessUnits, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
